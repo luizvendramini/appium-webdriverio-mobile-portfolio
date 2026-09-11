@@ -25,9 +25,11 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      - name: Install Appium XCUITest driver
-        run: npx appium driver install xcuitest
-
+      # Nao rodamos `appium driver install` aqui: desde o Appium 2+, um driver
+      # listado como dependencia do projeto (appium-xcuitest-driver, no
+      # package.json) e autodetectado pelo mecanismo de "peer dependency" do
+      # proprio Appium assim que o `npm install` termina. Um `driver install`
+      # explicito depois disso falha com "driver ... is already installed".
       - name: Download demo app (iOS simulator build)
         run: |
           mkdir -p apps
