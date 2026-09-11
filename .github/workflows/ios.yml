@@ -1,0 +1,55 @@
+name: iOS Mobile Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ios:
+    # macOS e a unica familia de runner do GitHub Actions com o Xcode e os
+    # simuladores de iOS ja instalados - e um requisito, nao uma escolha.
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Install Appium XCUITest driver
+        run: npx appium driver install xcuitest
+
+      - name: Download demo app (iOS simulator build)
+        run: |
+          mkdir -p apps
+          curl -sSL -o apps/ios.simulator.wdio.native.app.v2.2.0.zip \
+            https://github.com/webdriverio/native-demo-app/releases/download/v2.2.0/ios.simulator.wdio.native.app.v2.2.0.zip
+          unzip -o apps/ios.simulator.wdio.native.app.v2.2.0.zip -d apps
+
+      - name: Detect an available iOS Simulator
+        id: simulator
+        run: node scripts/detect-ios-simulator.mjs
+
+      - name: Run tests on iOS Simulator
+        env:
+          IOS_DEVICE_NAME: ${{ steps.simulator.outputs.device-name }}
+          IOS_PLATFORM_VERSION: ${{ steps.simulator.outputs.platform-version }}
+        run: npm run ios
+
+      - name: Upload Appium logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appium-logs-ios
+          path: logs/
+          retention-days: 14
+          if-no-files-found: ignore
