@@ -1,0 +1,27 @@
+{
+  "name": "appium-webdriverio-mobile-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio de automacao mobile (iOS + Android) com WebdriverIO e Appium, em TypeScript, seguindo o padrao Page Object Model.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "android": "wdio run config/wdio.android.conf.ts",
+    "ios": "wdio run config/wdio.ios.conf.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@wdio/appium-service": "^9.22.0",
+    "@wdio/cli": "^9.22.0",
+    "@wdio/globals": "^9.17.0",
+    "@wdio/local-runner": "^9.22.0",
+    "@wdio/mocha-framework": "^9.22.0",
+    "@wdio/spec-reporter": "^9.20.0",
+    "appium": "^3.1.2",
+    "appium-uiautomator2-driver": "^6.7.6",
+    "appium-xcuitest-driver": "^10.13.2",
+    "typescript": "^5.9.3"
+  }
+}
