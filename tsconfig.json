@@ -4,6 +4,14 @@
     "module": "NodeNext",
     "moduleResolution": "Node16",
     "sourceMap": false,
+    // Isola o typecheck do nosso codigo dos .d.ts de dependencias de terceiros.
+    // Sem isso, o `tsc --noEmit` falha por inconsistencias internas de tipos em
+    // pacotes como webdriverio/expect-webdriverio/@wdio/globals (ex.: uma
+    // dependencia opcional como puppeteer-core sem seus tipos instalados, ou um
+    // arquivo de tipos usando `export =` num pacote marcado como ESM) - erros
+    // que nao tem relacao com o nosso codigo e que so a propria manutencao
+    // dessas bibliotecas pode corrigir.
+    "skipLibCheck": true,
     "removeComments": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
