@@ -49,11 +49,24 @@ jobs:
       # direto pelo simctl e sem prazo imposto pelo Appium, para que quando os
       # testes comecarem o simulador ja esteja pronto e o boot pelo Appium
       # seja quase instantaneo. `simctl boot` falha se o simulador ja estiver
-      # de pe (nao deveria estar, mas o `|| true` deixa o passo idempotente).
+      # de pé (não deveria estar, mas o `|| true` deixa o passo idempotente).
       - name: Pre-boot the iOS Simulator
         run: |
           xcrun simctl boot ${{ steps.simulator.outputs.udid }} || true
           xcrun simctl bootstatus ${{ steps.simulator.outputs.udid }} -b
+
+      # Mesma ideia do pre-boot acima, mas para outro comando lento na
+      # primeira execucao: assim que a sessao comeca, o driver XCUITest roda
+      # `xcrun --sdk iphonesimulator --show-sdk-version` internamente para
+      # descobrir a versao do SDK - e da um timeout fixo de so 15s pra essa
+      # chamada (nao configuravel via capability). Confirmado em CI (run #10,
+      # commit 6a88a6f): a primeira chamada a esse xcrun especifico, num
+      # runner "frio", pode passar bem desses 15s (provavelmente indexacao
+      # interna do toolchain), derrubando a sessao antes mesmo dos testes
+      # comecarem. Rodamos o mesmo comando aqui uma vez, sem prazo imposto
+      # pelo Appium, pra "aquecer" esse cache antes do npm run ios.
+      - name: Warm up the Xcode SDK version cache
+        run: xcrun --sdk iphonesimulator --show-sdk-version
 
       - name: Run tests on iOS Simulator
         env:
