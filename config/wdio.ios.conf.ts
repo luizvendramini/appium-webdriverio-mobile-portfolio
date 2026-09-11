@@ -31,6 +31,10 @@ export const config: WebdriverIO.Config = {
       'appium:automationName': 'XCUITest',
       'appium:app': APP_FILE,
       'appium:newCommandTimeout': 240,
+      // Margem extra alem do pre-boot feito no workflow (ver ios.yml): mesmo
+      // com o simulador ja de pe, uma carga do runner mais pesada pode deixar
+      // o boot mais lento que o padrao de 120s do Appium.
+      'appium:simulatorStartupTimeout': 180_000,
       // Sem isso, digitacao rapida em campos de texto pode perder caracteres
       // no simulador do iOS (problema conhecido do XCUITest).
       'appium:maxTypingFrequency': 30,
