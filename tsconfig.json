@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "NodeNext",
+    "moduleResolution": "Node16",
+    "sourceMap": false,
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "types": [
+      "node",
+      "@wdio/types",
+      "@wdio/globals/types",
+      "@wdio/mocha-framework",
+      "expect-webdriverio"
+    ]
+  },
+  "include": ["./config/**/*.ts", "./pages/**/*.ts", "./components/**/*.ts", "./tests/**/*.ts"]
+}
