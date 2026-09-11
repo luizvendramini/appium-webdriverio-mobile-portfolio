@@ -18,7 +18,15 @@ class TabBar {
   }
 
   async waitUntilShown(): Promise<boolean | void> {
-    return $('~Home').waitForDisplayed({ timeout: 20_000 });
+    // Esse e o primeiro ponto de sincronizacao logo apos o app abrir "frio"
+    // (cold start): o bundle JS do Expo ainda precisa carregar e renderizar,
+    // o que pode levar bem mais tempo num emulador de CI do que numa
+    // interacao normal em qualquer outro ponto da suite - por isso usamos
+    // aqui o mesmo timeout global generoso (`waitforTimeout` no
+    // wdio.shared.conf.ts) em vez de um valor mais curto e arbitrario, que
+    // deixava esse primeiro passo mais propenso a flakiness que o resto da
+    // suite.
+    return $('~Home').waitForDisplayed();
   }
 }
 
