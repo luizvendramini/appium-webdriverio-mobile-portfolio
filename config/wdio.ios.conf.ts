@@ -22,19 +22,13 @@ export const config: WebdriverIO.Config = {
   specs: ['../tests/specs/**/*.spec.ts'],
 
   // Sobrescreve o `connectionRetryTimeout` de 120s (padrao em
-  // wdio.shared.conf.ts) apenas para iOS. Ao criar uma sessao nova, o
-  // driver XCUITest builda, instala e sobe o WebDriverAgent (WDA) dentro do
-  // simulador antes de responder ao POST /session - num runner do GitHub
-  // Actions isso rotineiramente passa dos 2 minutos (confirmado em CI: a
-  // criacao de sessao falhava com "UND_ERR_HEADERS_TIMEOUT" apos ~120s,
-  // exatamente o valor do timeout global, em toda tentativa). O Android
-  // nao sofre desse problema (o UiAutomator2 so precisa instalar um apk
-  // pequeno), entao mantemos o timeout padrao la e damos essa margem extra
-  // soh aqui. O valor e generoso de proposito: por ser so um teto, ele nao
-  // deixa uma sessao bem-sucedida mais lenta, so evita que uma criacao de
-  // sessao legitima (porem naturalmente mais lenta) seja abortada cedo
-  // demais.
-  connectionRetryTimeout: 300_000,
+  // wdio.shared.conf.ts) apenas para iOS. Precisa ficar acima dos timeouts
+  // internos do Appium para o WebDriverAgent (capabilities abaixo:
+  // wdaLaunchTimeout + wdaConnectionTimeout), senao o cliente desiste antes
+  // do proprio Appium. O Android nao sofre desse problema (o UiAutomator2
+  // so precisa instalar um apk pequeno), entao mantemos o timeout padrao la
+  // e damos essa margem extra soh aqui.
+  connectionRetryTimeout: 360_000,
 
   capabilities: [
     {
@@ -50,6 +44,22 @@ export const config: WebdriverIO.Config = {
       // com o simulador ja de pe, uma carga do runner mais pesada pode deixar
       // o boot mais lento que o padrao de 120s do Appium.
       'appium:simulatorStartupTimeout': 180_000,
+      // Confirmado em CI (run #8, commit c959925): a criacao de sessao
+      // falhou com "Could not proxy command to the remote server ...
+      // ECONNREFUSED 127.0.0.1:8100" apos exatamente ~240s - o valor padrao
+      // do `wdaConnectionTimeout` do driver XCUITest. Ou seja, o gargalo real
+      // nao e mais o nosso `connectionRetryTimeout` (ja aumentado antes),
+      // e sim os timeouts INTERNOS do proprio Appium esperando o
+      // WebDriverAgent (WDA) compilar, instalar e responder dentro do
+      // simulador - processo que, num simulador recem-criado rodando a
+      // versao de iOS mais nova disponivel no runner (sem build de WDA em
+      // cache), pode legitimamente passar dos defaults abaixo:
+      //   wdaLaunchTimeout: 60s -> aqui, 240s
+      //   wdaConnectionTimeout: 240s -> aqui, 300s
+      // Generosos de proposito: sao apenas um teto de seguranca e nao
+      // deixam uma sessao bem-sucedida mais lenta.
+      'appium:wdaLaunchTimeout': 240_000,
+      'appium:wdaConnectionTimeout': 300_000,
       // Sem isso, digitacao rapida em campos de texto pode perder caracteres
       // no simulador do iOS (problema conhecido do XCUITest).
       'appium:maxTypingFrequency': 30,
