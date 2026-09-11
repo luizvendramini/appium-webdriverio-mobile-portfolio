@@ -1,0 +1,2 @@
+# Mantem esta pasta versionada; os apks/zips baixados aqui em tempo de CI
+# sao ignorados via .gitignore.
