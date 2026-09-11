@@ -41,6 +41,20 @@ jobs:
         id: simulator
         run: node scripts/detect-ios-simulator.mjs
 
+      # Um simulador que nunca foi iniciado na imagem do runner passa, no seu
+      # primeiro boot, por uma migracao de dados interna do iOS (aparece nos
+      # logs do Appium como "Waiting on Data Migration") que pode levar bem
+      # mais que os 120s que o Appium espera por padrao antes de desistir
+      # (appium:simulatorStartupTimeout). Fazemos esse boot "a frio" aqui,
+      # direto pelo simctl e sem prazo imposto pelo Appium, para que quando os
+      # testes comecarem o simulador ja esteja pronto e o boot pelo Appium
+      # seja quase instantaneo. `simctl boot` falha se o simulador ja estiver
+      # de pe (nao deveria estar, mas o `|| true` deixa o passo idempotente).
+      - name: Pre-boot the iOS Simulator
+        run: |
+          xcrun simctl boot ${{ steps.simulator.outputs.udid }} || true
+          xcrun simctl bootstatus ${{ steps.simulator.outputs.udid }} -b
+
       - name: Run tests on iOS Simulator
         env:
           IOS_DEVICE_NAME: ${{ steps.simulator.outputs.device-name }}
