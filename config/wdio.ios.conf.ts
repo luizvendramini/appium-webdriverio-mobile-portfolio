@@ -30,6 +30,21 @@ export const config: WebdriverIO.Config = {
   // e damos essa margem extra soh aqui.
   connectionRetryTimeout: 360_000,
 
+  // Mesmo com todos os timeouts acima generosos, a criacao de sessao do
+  // XCUITest as vezes ainda trava por varios minutos sem nenhum sintoma
+  // novo no log (confirmado em CI, commit b865ab3: UND_ERR_HEADERS_TIMEOUT
+  // apos ~7min) - isso ja nao e mais falta de timeout, e sim instabilidade
+  // pontual do proprio par macOS-runner + simulador do GitHub Actions, fora
+  // do nosso controle. Pra esse tipo especifico de flakiness de
+  // infraestrutura (nao de teste em si - nao estamos escondendo um bug real
+  // com isso), a pratica padrao e retry no nivel de spec file. Limitamos a
+  // 2 tentativas extras: o suficiente pra absorver uma falha pontual de
+  // ambiente, sem mascarar um problema real que se repita de forma
+  // consistente. O Android nunca apresentou esse tipo de falha, entao o
+  // retry fica isolado aqui.
+  specFileRetries: 2,
+  specFileRetriesDelay: 5,
+
   capabilities: [
     {
       platformName: 'iOS',
