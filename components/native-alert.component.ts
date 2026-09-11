@@ -15,7 +15,17 @@ const IOS_ALERT_SELECTOR = "-ios predicate string:type == 'XCUIElementTypeAlert'
 class NativeAlert {
   async waitForIsShown(isShown = true): Promise<boolean | void> {
     const selector = driver.isAndroid ? ANDROID_SELECTORS.title : IOS_ALERT_SELECTOR;
-    return $(selector).waitForExist({ timeout: 11_000, reverse: !isShown });
+    // Mesmo problema que ja corrigimos em TabBar.waitUntilShown(): esse
+    // timeout fixo de 11s era mais curto que o timeout global da suite
+    // (45s, em wdio.shared.conf.ts) e, sob a carga de um emulador/simulador
+    // de CI, o alerta nativo (que so aparece depois do clique em LOGIN/SIGN
+    // UP) as vezes demora mais que isso pra renderizar ou fechar -
+    // confirmado em CI: "deve logar com sucesso" falhou com "element ...
+    // still not existing after 11000ms" mesmo com o app e as credenciais
+    // corretos. Herdar o timeout global deixa esse ponto de sincronizacao
+    // tao resiliente quanto o resto da suite, sem deixar uma execucao
+    // bem-sucedida mais lenta - o timeout e so um teto de seguranca.
+    return $(selector).waitForExist({ reverse: !isShown });
   }
 
   async text(): Promise<string> {
